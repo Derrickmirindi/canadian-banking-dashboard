@@ -38,7 +38,7 @@ body.grid-on .toggle .dot{background:#fff;}
 .lede{grid-column:9 / 13;font-size:15px;line-height:var(--lh);color:var(--ink-soft);align-self:end;}
 .metrics{grid-column:1 / -1;display:grid;grid-template-columns:subgrid;margin-top:var(--lh);}
 @supports not (grid-template-columns:subgrid){.metrics{grid-template-columns:repeat(var(--cols),1fr);column-gap:var(--gutter);}}
-.metric{grid-column:span 3;border-top:2px solid var(--ink);padding-top:var(--bl);}
+.metric{grid-column:span 3;padding-top:var(--bl);}
 .metric .numeral{font-size:64px;line-height:var(--lh);font-weight:800;display:block;margin-bottom:var(--lh);}
 .metric .cap{font-family:"Space Mono",monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);}
 .shead{grid-column:1 / -1;border-top:2px solid var(--ink);padding-top:var(--bl);margin-top:var(--lh);}
@@ -93,10 +93,7 @@ footer{grid-column:1 / -1;border-top:2px solid var(--ink);margin-top:var(--lh);p
 <div class="kicker">Canadian Finance/ Under Development by Derrick Mirindi, David Sinkhonde & Frederic Mirindi</div>
 <h1 class="masthead">Bank<em>Map</em> Canada</h1>
 <p class="lede">Banks, credit unions, foreign subsidiaries, note printers and mutual-fund platforms across Canada — mapped by head office, with ownership, scale and data-access notes.</p>
-
-
-  
-  <div class="metrics">
+<div class="metrics">
 <div class="metric"><span class="numeral">40</span><span class="cap">Institutions</span></div>
 <div class="metric"><span class="numeral">06</span><span class="cap">Big Six</span></div>
 <div class="metric"><span class="numeral">09</span><span class="cap">Fund platforms</span></div>
