@@ -1,7 +1,5 @@
 # BankMap Canada
 
-<img width="1183" height="1197" alt="image" src="https://github.com/user-attachments/assets/3d191f5a-ee97-4c7c-a270-5fce772e417a" />
-
 An interactive dashboard of Canadian banks, credit unions, foreign bank subsidiaries, banknote printers, and mutual fund platforms across Canada. The project maps institutions by head office and presents ownership, classification, scale, and selected market context in a clean editorial-style interface. [page:13][page:1]
 
 **Authors:** Derrick Mirindi, David Sinkhonde, and Frederic Mirindi. [page:13]
