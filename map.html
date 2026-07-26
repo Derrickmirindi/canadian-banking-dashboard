@@ -3,78 +3,118 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BankMap Canada — Financial Institutions on a Living Map</title>
+<title>BankMap Canada — Muller-Brockmann Edition</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-:root{--navy:#0d1b3e;--navy2:#132552;--ink:#0a142e;--cream:#f6f1e7;--accent:#e2483d;--gold:#f2c14e;--blue:#7aa7ff;--muted:#9fb0d0;--card:#16244f;}
+:root{
+--cols:12;--bl:8px;--lh:24px;--gutter:24px;--margin:72px;--maxw:1296px;
+--paper:#ffffff;--ink:#111315;--ink-soft:#5b6066;--accent:#e4002b;
+--g-col:rgba(228,0,43,.075);--g-edge:rgba(228,0,43,.40);
+--g-base:rgba(0,150,140,.34);--g-base-min:rgba(0,150,140,.12);
+}
 *{margin:0;padding:0;box-sizing:border-box;}
-html,body{height:100%;font-family:'Segoe UI',system-ui,Helvetica,Arial,sans-serif;background:var(--navy);color:var(--cream);}
-.app{display:flex;height:100vh;overflow:hidden;}
-.sidebar{width:360px;min-width:360px;background:linear-gradient(180deg,var(--ink),var(--navy));border-right:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;overflow-y:auto;}
-.brand{padding:22px 22px 12px;}
-.logo{font-family:Georgia,serif;font-size:26px;font-weight:700;}
-.logo i{font-style:italic;color:var(--accent);}
-.tag{color:var(--blue);font-size:11px;letter-spacing:2px;text-transform:uppercase;margin-top:6px;}
-.headline{font-family:Georgia,serif;font-size:21px;line-height:1.25;padding:6px 22px 4px;}
-.headline em{font-style:italic;color:var(--gold);}
-.sub{color:var(--muted);font-size:12.5px;line-height:1.5;padding:6px 22px 14px;}
-.stats{display:flex;gap:8px;padding:0 18px 14px;flex-wrap:wrap;}
-.stat{background:var(--card);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:9px 11px;flex:1;min-width:66px;}
-.stat b{display:block;font-size:19px;color:var(--gold);}
-.stat span{font-size:8.5px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
-.section-title{padding:6px 22px;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--blue);}
-.filters{padding:4px 16px 8px;display:flex;flex-wrap:wrap;gap:6px;}
-.filters button{background:var(--card);color:var(--cream);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:6px 11px;font-size:11px;cursor:pointer;}
+html,body{background:var(--paper);color:var(--ink);font-family:Inter,system-ui,sans-serif;font-size:16px;line-height:var(--lh);-webkit-font-smoothing:antialiased;}
+.toggle{position:fixed;top:16px;right:16px;z-index:2000;display:flex;align-items:center;gap:10px;background:var(--ink);color:#fff;border:none;cursor:pointer;font-family:"Space Mono",monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;padding:8px 14px;}
+.toggle .dot{width:9px;height:9px;border-radius:50%;background:#555;}
+.grid-on .toggle{background:var(--accent);}
+body.grid-on .toggle .dot{background:#fff;}
+.spread{position:relative;width:100%;}
+.wrap{position:relative;max-width:var(--maxw);margin:0 auto;padding:calc(var(--bl)*12) var(--margin);}
+.grid{display:grid;grid-template-columns:repeat(var(--cols),1fr);column-gap:var(--gutter);row-gap:var(--lh);}
+.band{grid-column:1 / -1;display:grid;grid-template-columns:subgrid;column-gap:var(--gutter);row-gap:var(--lh);align-items:start;}
+@supports not (grid-template-columns:subgrid){.band{grid-template-columns:repeat(var(--cols),1fr);}}
+.guides{position:absolute;inset:0;pointer-events:none;z-index:60;opacity:0;transition:opacity .26s ease;}
+.grid-on .guides{opacity:1;}
+.guides .cols{position:absolute;top:0;bottom:0;left:var(--margin);right:var(--margin);display:grid;grid-template-columns:repeat(var(--cols),1fr);column-gap:var(--gutter);}
+.guides .col{background:var(--g-col);box-shadow:inset 1px 0 0 var(--g-edge),inset -1px 0 0 var(--g-edge);position:relative;}
+.guides .col span{position:absolute;top:4px;left:0;right:0;text-align:center;font-family:"Space Mono",monospace;font-size:10px;line-height:1;color:var(--accent);}
+.guides .rows{position:absolute;left:var(--margin);right:var(--margin);top:calc(var(--bl)*12);bottom:0;background-image:repeating-linear-gradient(to bottom,var(--g-base) 0 1px,transparent 1px var(--lh)),repeating-linear-gradient(to bottom,var(--g-base-min) 0 1px,transparent 1px var(--bl));}
+.kicker{font-family:"Space Mono",monospace;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);grid-column:1 / -1;margin-bottom:var(--bl);}
+.masthead{grid-column:1 / 9;font-size:88px;line-height:80px;font-weight:800;letter-spacing:-.02em;}
+.masthead em{font-style:normal;color:var(--accent);}
+.lede{grid-column:9 / 13;font-size:15px;line-height:var(--lh);color:var(--ink-soft);align-self:end;}
+.metrics{grid-column:1 / -1;display:grid;grid-template-columns:subgrid;margin-top:var(--lh);}
+@supports not (grid-template-columns:subgrid){.metrics{grid-template-columns:repeat(var(--cols),1fr);column-gap:var(--gutter);}}
+.metric{grid-column:span 3;border-top:2px solid var(--ink);padding-top:var(--bl);}
+.metric .numeral{font-size:64px;line-height:var(--lh);font-weight:800;display:block;margin-bottom:var(--lh);}
+.metric .cap{font-family:"Space Mono",monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);}
+.shead{grid-column:1 / -1;border-top:2px solid var(--ink);padding-top:var(--bl);margin-top:var(--lh);}
+.shead h2{font-size:32px;line-height:var(--lh);font-weight:700;}
+.shead .num{font-family:"Space Mono",monospace;font-size:12px;color:var(--accent);letter-spacing:.1em;}
+.controls{grid-column:1 / -1;display:grid;grid-template-columns:subgrid;}
+@supports not (grid-template-columns:subgrid){.controls{grid-template-columns:repeat(var(--cols),1fr);column-gap:var(--gutter);}}
+#search{grid-column:1 / 5;border:none;border-bottom:2px solid var(--ink);padding:var(--bl) 0;font-family:Inter,sans-serif;font-size:14px;background:transparent;}
+.filters{grid-column:5 / 13;display:flex;flex-wrap:wrap;gap:var(--bl);}
+.filters button{background:transparent;border:1px solid var(--ink);color:var(--ink);font-family:"Space Mono",monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:6px 12px;cursor:pointer;}
 .filters button.active{background:var(--accent);border-color:var(--accent);color:#fff;}
-.searchbox{padding:4px 16px 12px;}
-.searchbox input{width:100%;background:var(--card);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:9px 12px;color:var(--cream);font-size:13px;}
-.list{padding:0 10px 20px;}
-.item{background:var(--card);border:1px solid rgba(255,255,255,.06);border-left:4px solid var(--blue);border-radius:8px;padding:9px 11px;margin:6px;cursor:pointer;}
-.item:hover{background:#1c2c5e;}
-.item h4{font-size:13px;margin-bottom:2px;}
-.item p{font-size:11px;color:var(--muted);line-height:1.4;}
-.main{flex:1;position:relative;}
-#map{width:100%;height:100%;background:#0a142e;}
-.overlay{position:absolute;top:14px;right:14px;z-index:500;background:rgba(13,27,62,.92);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:12px 14px;max-width:230px;}
-.overlay h3{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--blue);margin-bottom:7px;}
-.lrow{display:flex;align-items:center;gap:8px;font-size:12px;margin:4px 0;}
-.dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;}
-.fx{position:absolute;bottom:14px;left:14px;z-index:500;background:rgba(13,27,62,.92);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:12px 14px;}
-.fx h3{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);margin-bottom:6px;}
-.fx div{font-size:12px;margin:3px 0;color:var(--cream);}
-.tabbar{display:flex;padding:0 16px;border-bottom:1px solid rgba(255,255,255,.08);}
-.tabbar button{flex:1;background:transparent;border:none;color:var(--muted);padding:11px 0;font-size:11px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;border-bottom:2px solid transparent;}
-.tabbar button.active{color:var(--cream);border-bottom-color:var(--accent);}
-.leaflet-popup-content-wrapper{background:var(--navy2);color:var(--cream);border-radius:10px;}
-.leaflet-popup-tip{background:var(--navy2);}
-.pop h4{margin-bottom:5px;font-size:14px;color:var(--gold);}
-.pop p{font-size:12px;line-height:1.45;color:#dfe6f5;margin:2px 0;}
-.pop a{color:var(--blue);}
-#fundPane{display:none;padding:6px 12px 30px;}
-.fcard{background:var(--card);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:11px 13px;margin:8px 6px;}
-.fcard h4{font-size:13px;color:var(--gold);margin-bottom:4px;}
-.fcard p{font-size:11px;color:var(--muted);line-height:1.45;margin:3px 0;}
-.fcard a{color:var(--blue);font-size:11px;}
-@media(max-width:760px){.app{flex-direction:column;}.sidebar{width:100%;min-width:0;height:46vh;}.main{height:54vh;}}
+.mapband{grid-column:1 / 9;}
+#map{width:100%;height:480px;border:2px solid var(--ink);background:#f2f2f2;}
+.legend{grid-column:9 / 13;}
+.legend h3{font-family:"Space Mono",monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:var(--lh);border-bottom:1px solid var(--ink);padding-bottom:var(--bl);}
+.lrow{display:flex;align-items:center;gap:var(--bl);font-size:13px;line-height:var(--lh);}
+.lrow .dot{width:11px;height:11px;flex-shrink:0;}
+.fx{grid-column:9 / 13;margin-top:var(--lh);border-top:2px solid var(--ink);padding-top:var(--bl);}
+.fx h3{font-family:"Space Mono",monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:var(--bl);}
+.fx div{font-family:"Space Mono",monospace;font-size:14px;line-height:var(--lh);}
+.list{grid-column:1 / -1;display:grid;grid-template-columns:subgrid;}
+@supports not (grid-template-columns:subgrid){.list{grid-template-columns:repeat(var(--cols),1fr);column-gap:var(--gutter);}}
+.item{grid-column:span 4;border-top:1px solid var(--ink);padding:var(--bl) 0 var(--lh);cursor:pointer;}
+.item:hover h4{color:var(--accent);}
+.item .idx{font-family:"Space Mono",monospace;font-size:10px;color:var(--accent);}
+.item h4{font-size:16px;line-height:var(--lh);font-weight:600;}
+.item p{font-size:12px;line-height:var(--lh);color:var(--ink-soft);}
+.item .swatch{display:inline-block;width:8px;height:8px;margin-right:6px;}
+.fund{grid-column:span 6;border-top:1px solid var(--ink);padding:var(--bl) 0 var(--lh);}
+.fund h4{font-size:18px;line-height:var(--lh);font-weight:700;}
+.fund .prov{font-family:"Space Mono",monospace;font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:.06em;}
+.fund p{font-size:13px;line-height:var(--lh);color:var(--ink-soft);}
+.fund a{color:var(--ink);font-weight:600;text-decoration:none;border-bottom:2px solid var(--accent);font-size:13px;}
+.pane{display:none;}
+.pane.on{display:grid;grid-template-columns:subgrid;grid-column:1 / -1;}
+@supports not (grid-template-columns:subgrid){.pane.on{display:grid;grid-template-columns:repeat(var(--cols),1fr);column-gap:var(--gutter);}}
+.tabbar{grid-column:1 / -1;display:flex;gap:0;border-bottom:2px solid var(--ink);margin-top:var(--lh);}
+.tabbar button{background:transparent;border:none;padding:var(--bl) 20px;font-family:"Space Mono",monospace;font-size:12px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;color:var(--ink-soft);}
+.tabbar button.active{color:var(--ink);border-bottom:3px solid var(--accent);margin-bottom:-2px;}
+.leaflet-popup-content-wrapper{border-radius:0;border:2px solid var(--ink);}
+.pop h4{font-size:14px;color:var(--accent);margin-bottom:4px;}
+.pop p{font-size:12px;line-height:1.4;margin:2px 0;}
+footer{grid-column:1 / -1;border-top:2px solid var(--ink);margin-top:var(--lh);padding-top:var(--bl);font-family:"Space Mono",monospace;font-size:11px;color:var(--ink-soft);letter-spacing:.06em;}
+@media(max-width:900px){:root{--margin:24px;}.masthead{grid-column:1 / -1;font-size:56px;line-height:56px;}.lede{grid-column:1 / -1;}.metric{grid-column:span 6;}.mapband,.legend,.fx{grid-column:1 / -1;}.item{grid-column:span 6;}.fund{grid-column:1 / -1;}}
 </style>
 </head>
 <body>
-<div class="app">
-<aside class="sidebar">
-<div class="brand"><div class="logo"><i>Bank</i>Map Canada</div><div class="tag">Canadian finance, on a living map</div></div>
-<div class="headline">Explore the institutions that <em>move the money</em></div>
-<div class="sub">Banks, credit unions, foreign subsidiaries, note printers and mutual fund platforms across Canada — mapped by head office, with ownership, scale and data-access notes.</div>
-<div class="stats"><div class="stat"><b>40</b><span>Institutions</span></div><div class="stat"><b>6</b><span>Big Six</span></div><div class="stat"><b>9</b><span>Fund platforms</span></div><div class="stat"><b>3</b><span>Note-print</span></div></div>
-<div class="tabbar"><button id="tabMap" class="active" onclick="showTab('map')">Map directory</button><button id="tabFund" onclick="showTab('fund')">Mutual funds</button></div>
-<div id="mapPane"><div class="section-title">Filter by type</div><div class="filters" id="filters"></div><div class="searchbox"><input id="search" placeholder="Search institution or owner..."/></div><div class="list" id="list"></div></div>
-<div id="fundPane"></div>
-</aside>
-<div class="main"><div id="map"></div><div class="overlay"><h3>Legend</h3><div id="legend"></div></div><div class="fx"><h3>Live CAD rates</h3><div id="fxbox">Loading...</div></div></div>
+<button class="toggle" id="gridToggle" aria-pressed="false"><span class="dot"></span><span class="lbl">Show grid</span></button>
+<section class="spread">
+<div class="wrap">
+<div class="grid">
+<div class="kicker">Canadian Finance / Living Map / Folio 01</div>
+<h1 class="masthead">Bank<em>Map</em> Canada</h1>
+<p class="lede">Banks, credit unions, foreign subsidiaries, note printers and mutual-fund platforms across Canada — mapped by head office, with ownership, scale and data-access notes.</p>
+<div class="metrics">
+<div class="metric"><span class="numeral">40</span><span class="cap">Institutions</span></div>
+<div class="metric"><span class="numeral">06</span><span class="cap">Big Six</span></div>
+<div class="metric"><span class="numeral">09</span><span class="cap">Fund platforms</span></div>
+<div class="metric"><span class="numeral">03</span><span class="cap">Note printers</span></div>
 </div>
+<div class="tabbar"><button id="tabMap" class="active" onclick="showTab('map')">Map directory</button><button id="tabFund" onclick="showTab('fund')">Mutual funds</button></div>
+<div id="mapPane" class="pane on band">
+<div class="mapband"><div id="map"></div></div>
+<div class="legend"><h3>Legend</h3><div id="legendBox"></div><div class="fx"><h3>Live CAD rates</h3><div id="fxbox">Loading...</div></div></div>
+<div class="controls"><input id="search" placeholder="Search institution or owner..."><div class="filters" id="filters"></div></div>
+<div class="list" id="list"></div>
+</div>
+<div id="fundPane" class="pane band"></div>
+<footer>BankMap Canada · Muller-Brockmann edition · 12-col / 8px baseline · press G to toggle the grid</footer>
+</div>
+<div class="guides" aria-hidden="true"><div class="cols"></div><div class="rows"></div></div>
+</div>
+</section>
 <script>
 var CURRENCY_API_KEY="4d7d88f47058400eb7385433fa7ddf8e";
-var TYPES={big:["#f2c14e","Big Six bank"],coop:["#4ecb9a","Credit union / co-op"],digital:["#7aa7ff","Digital / online bank"],foreign:["#c792ea","Foreign-owned bank"],crown:["#ff8a65","Crown / public"],note:["#e2483d","Banknote printer"],other:["#9fb0d0","Other institution"]};
+var TYPES={big:["#e4002b","Big Six bank"],coop:["#111315","Credit union / co-op"],digital:["#5b6066","Digital / online bank"],foreign:["#9a9a9a","Foreign-owned bank"],crown:["#c0392b","Crown / public"],note:["#e4002b","Banknote printer"],other:["#c7c7c7","Other institution"]};
 var D=[
 ["Royal Bank of Canada (RBC)","Royal Bank of Canada (TSX)","Assets ~C$2.3T; revenue ~C$57.5B (2024-25)","~1,250 branches","big",43.6476,-79.3810,"No; uses Bank of Canada notes"],
 ["TD Canada Trust","Toronto-Dominion Bank (TSX)","Assets ~C$2.1T; revenue ~C$57.2B","~1,060 branches","big",43.6469,-79.3813,"No; uses Bank of Canada notes"],
@@ -129,11 +169,11 @@ var FUNDS=[
 ["Independent asset managers (CI, Fidelity, Invesco, Mackenzie, Ninepoint)","Own branded fund families (CI, Fidelity, Invesco Funds...)","Each offers many equity, fixed income and balanced funds.","https://www.morningstar.ca/"]
 ];
 var map=L.map('map',{zoomControl:true}).setView([56.13,-96.35],4);
-L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'&copy; OpenStreetMap &copy; CARTO',subdomains:'abcd',maxZoom:19}).addTo(map);
-var markers=[],activeFilter='all',markerMap={};
-function mk(lat,lng,color){return L.circleMarker([lat,lng],{radius:8,color:'#fff',weight:1.5,fillColor:color,fillOpacity:.9});}
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{attribution:'© OpenStreetMap © CARTO',subdomains:'abcd',maxZoom:19}).addTo(map);
+var markers=[],activeFilter='all';
+function mk(lat,lng,color){return L.circleMarker([lat,lng],{radius:7,color:'#111315',weight:1.5,fillColor:color,fillOpacity:.9});}
 function render(){
-markers.forEach(function(m){map.removeLayer(m);});markers=[];markerMap={};
+markers.forEach(function(m){map.removeLayer(m);});markers=[];
 var q=document.getElementById('search').value.toLowerCase();
 var list=document.getElementById('list');list.innerHTML='';
 D.forEach(function(r,i){
@@ -143,9 +183,10 @@ if(q&&(name.toLowerCase().indexOf(q)<0&&owner.toLowerCase().indexOf(q)<0))return
 var color=TYPES[type][0];
 var m=mk(lat,lng,color).addTo(map);
 m.bindPopup('<div class="pop"><h4>'+name+'</h4><p><b>Owner:</b> '+owner+'</p><p><b>Scale:</b> '+scale+'</p><p><b>Branches:</b> '+branch+'</p><p><b>Type:</b> '+TYPES[type][1]+'</p><p><b>Banknote printing:</b> '+note+'</p></div>');
-markers.push(m);markerMap[i]=m;
-var item=document.createElement('div');item.className='item';item.style.borderLeftColor=color;
-item.innerHTML='<h4>'+name+'</h4><p>'+owner+' &middot; '+TYPES[type][1]+'</p>';
+markers.push(m);
+var item=document.createElement('div');item.className='item';
+var n=(i+1<10?'0':'')+(i+1);
+item.innerHTML='<div class="idx">'+n+'</div><h4><span class="swatch" style="background:'+color+'"></span>'+name+'</h4><p>'+owner+' — '+TYPES[type][1]+'</p>';
 item.onclick=(function(mm,la,ln){return function(){map.setView([la,ln],9);mm.openPopup();};})(m,lat,lng);
 list.appendChild(item);
 });
@@ -155,18 +196,25 @@ var f=document.getElementById('filters');
 var cats=[['all','All']];for(var k in TYPES)cats.push([k,TYPES[k][1]]);
 cats.forEach(function(c){var b=document.createElement('button');b.textContent=c[1];if(c[0]==='all')b.className='active';b.onclick=function(){activeFilter=c[0];document.querySelectorAll('.filters button').forEach(function(x){x.classList.remove('active');});b.classList.add('active');render();};f.appendChild(b);});
 }
-function buildLegend(){var l=document.getElementById('legend');for(var k in TYPES){var d=document.createElement('div');d.className='lrow';d.innerHTML='<span class="dot" style="background:'+TYPES[k][0]+'"></span>'+TYPES[k][1];l.appendChild(d);}}
-function buildFunds(){var p=document.getElementById('fundPane');FUNDS.forEach(function(r){var c=document.createElement('div');c.className='fcard';c.innerHTML='<h4>'+r[0]+'</h4><p><b>'+r[1]+'</b></p><p>'+r[2]+'</p><a href="'+r[3]+'" target="_blank">View fund list &rarr;</a>';p.appendChild(c);});}
-function showTab(t){var mapPane=document.getElementById('mapPane'),fundPane=document.getElementById('fundPane');if(t==='map'){mapPane.style.display='block';fundPane.style.display='none';document.getElementById('tabMap').classList.add('active');document.getElementById('tabFund').classList.remove('active');}else{mapPane.style.display='none';fundPane.style.display='block';document.getElementById('tabFund').classList.add('active');document.getElementById('tabMap').classList.remove('active');}}
+function buildLegend(){var l=document.getElementById('legendBox');for(var k in TYPES){var d=document.createElement('div');d.className='lrow';d.innerHTML='<span class="dot" style="background:'+TYPES[k][0]+'"></span>'+TYPES[k][1];l.appendChild(d);}}
+function buildFunds(){var p=document.getElementById('fundPane');FUNDS.forEach(function(r){var c=document.createElement('div');c.className='fund';c.innerHTML='<div class="prov">'+r[1]+'</div><h4>'+r[0]+'</h4><p>'+r[2]+'</p><a href="'+r[3]+'" target="_blank" rel="noopener">View fund list →</a>';p.appendChild(c);});}
+function showTab(t){var mp=document.getElementById('mapPane'),fp=document.getElementById('fundPane');if(t==='map'){mp.classList.add('on');fp.classList.remove('on');document.getElementById('tabMap').classList.add('active');document.getElementById('tabFund').classList.remove('active');setTimeout(function(){map.invalidateSize();},60);}else{mp.classList.remove('on');fp.classList.add('on');document.getElementById('tabFund').classList.add('active');document.getElementById('tabMap').classList.remove('active');}}
 document.getElementById('search').addEventListener('input',render);
 function loadFX(){
-var url='https://api.currencyfreaks.com/v2.0/rates/latest?apikey='+CURRENCY_API_KEY+'&symbols=USD,EUR,GBP,CAD&base=CAD';
 fetch('https://api.currencyfreaks.com/v2.0/rates/latest?apikey='+CURRENCY_API_KEY+'&symbols=USD,EUR,GBP,CAD')
 .then(function(r){return r.json();})
 .then(function(j){var rt=j.rates||{};var cad=parseFloat(rt.CAD||0);var box=document.getElementById('fxbox');function per(sym){var v=parseFloat(rt[sym]||0);if(!cad||!v)return '-';return (v/cad).toFixed(4);}box.innerHTML='<div>1 CAD = '+per('USD')+' USD</div><div>1 CAD = '+per('EUR')+' EUR</div><div>1 CAD = '+per('GBP')+' GBP</div>';})
 .catch(function(){document.getElementById('fxbox').innerHTML='Rates unavailable';});
 }
-buildFilters();buildLegend();buildFunds();render();loadFX();
+function buildOverlay(){var cols=document.querySelector('.guides .cols');var n=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--cols'),10)||12;for(var i=1;i<=n;i++){var c=document.createElement('div');c.className='col';var s=document.createElement('span');s.textContent=i;c.appendChild(s);cols.appendChild(c);}}
+function setGrid(on){document.body.classList.toggle('grid-on',on);var b=document.getElementById('gridToggle');b.setAttribute('aria-pressed',on?'true':'false');var l=b.querySelector('.lbl');if(l)l.textContent=on?'Hide grid':'Show grid';}
+document.getElementById('gridToggle').addEventListener('click',function(){setGrid(!document.body.classList.contains('grid-on'));});
+document.addEventListener('keydown',function(e){if((e.key==='g'||e.key==='G')&&!e.metaKey&&!e.ctrlKey&&!e.altKey){var t=e.target.tagName;if(t==='INPUT'||t==='TEXTAREA')return;setGrid(!document.body.classList.contains('grid-on'));}});
+var cvs=document.createElement('canvas'),ctx=cvs.getContext('2d');
+function alignInk(){document.querySelectorAll('.masthead,.numeral,.shead h2').forEach(function(el){el.style.marginLeft='0px';var cs=getComputedStyle(el),ch=(el.textContent||'').trim().charAt(0);if(!ch)return;if(cs.textTransform==='uppercase')ch=ch.toUpperCase();ctx.font=cs.fontStyle+' '+cs.fontWeight+' '+cs.fontSize+' '+cs.fontFamily;ctx.textAlign='left';var abl=ctx.measureText(ch).actualBoundingBoxLeft;if(isFinite(abl))el.style.marginLeft=(-abl).toFixed(2)+'px';});}
+if(document.fonts&&document.fonts.ready){document.fonts.ready.then(alignInk);}else{alignInk();}
+var tt;window.addEventListener('resize',function(){clearTimeout(tt);tt=setTimeout(alignInk,120);});
+buildFilters();buildLegend();buildFunds();buildOverlay();render();loadFX();
 </script>
 </body>
 </html>
