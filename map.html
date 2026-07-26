@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BankMap Canada — Financial Institutions on a Living Map</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+:root{--navy:#0d1b3e;--navy2:#132552;--ink:#0a142e;--cream:#f6f1e7;--accent:#e2483d;--gold:#f2c14e;--blue:#7aa7ff;--muted:#9fb0d0;--card:#16244f;}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;font-family:'Segoe UI',system-ui,Helvetica,Arial,sans-serif;background:var(--navy);color:var(--cream);}
+.app{display:flex;height:100vh;overflow:hidden;}
+.sidebar{width:360px;min-width:360px;background:linear-gradient(180deg,var(--ink),var(--navy));border-right:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;overflow-y:auto;}
+.brand{padding:22px 22px 12px;}
+.logo{font-family:Georgia,serif;font-size:26px;font-weight:700;}
+.logo i{font-style:italic;color:var(--accent);}
+.tag{color:var(--blue);font-size:11px;letter-spacing:2px;text-transform:uppercase;margin-top:6px;}
+.headline{font-family:Georgia,serif;font-size:21px;line-height:1.25;padding:6px 22px 4px;}
+.headline em{font-style:italic;color:var(--gold);}
+.sub{color:var(--muted);font-size:12.5px;line-height:1.5;padding:6px 22px 14px;}
+.stats{display:flex;gap:8px;padding:0 18px 14px;flex-wrap:wrap;}
+.stat{background:var(--card);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:9px 11px;flex:1;min-width:66px;}
+.stat b{display:block;font-size:19px;color:var(--gold);}
+.stat span{font-size:8.5px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
+.section-title{padding:6px 22px;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--blue);}
+.filters{padding:4px 16px 8px;display:flex;flex-wrap:wrap;gap:6px;}
+.filters button{background:var(--card);color:var(--cream);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:6px 11px;font-size:11px;cursor:pointer;}
+.filters button.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+.searchbox{padding:4px 16px 12px;}
+.searchbox input{width:100%;background:var(--card);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:9px 12px;color:var(--cream);font-size:13px;}
+.list{padding:0 10px 20px;}
+.item{background:var(--card);border:1px solid rgba(255,255,255,.06);border-left:4px solid var(--blue);border-radius:8px;padding:9px 11px;margin:6px;cursor:pointer;}
+.item:hover{background:#1c2c5e;}
+.item h4{font-size:13px;margin-bottom:2px;}
+.item p{font-size:11px;color:var(--muted);line-height:1.4;}
+.main{flex:1;position:relative;}
+#map{width:100%;height:100%;background:#0a142e;}
+.overlay{position:absolute;top:14px;right:14px;z-index:500;background:rgba(13,27,62,.92);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:12px 14px;max-width:230px;}
+.overlay h3{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--blue);margin-bottom:7px;}
+.lrow{display:flex;align-items:center;gap:8px;font-size:12px;margin:4px 0;}
+.dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;}
+.fx{position:absolute;bottom:14px;left:14px;z-index:500;background:rgba(13,27,62,.92);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:12px 14px;}
+.fx h3{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);margin-bottom:6px;}
+.fx div{font-size:12px;margin:3px 0;color:var(--cream);}
+.tabbar{display:flex;padding:0 16px;border-bottom:1px solid rgba(255,255,255,.08);}
+.tabbar button{flex:1;background:transparent;border:none;color:var(--muted);padding:11px 0;font-size:11px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;border-bottom:2px solid transparent;}
+.tabbar button.active{color:var(--cream);border-bottom-color:var(--accent);}
+.leaflet-popup-content-wrapper{background:var(--navy2);color:var(--cream);border-radius:10px;}
+.leaflet-popup-tip{background:var(--navy2);}
+.pop h4{margin-bottom:5px;font-size:14px;color:var(--gold);}
+.pop p{font-size:12px;line-height:1.45;color:#dfe6f5;margin:2px 0;}
+.pop a{color:var(--blue);}
+#fundPane{display:none;padding:6px 12px 30px;}
+.fcard{background:var(--card);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:11px 13px;margin:8px 6px;}
+.fcard h4{font-size:13px;color:var(--gold);margin-bottom:4px;}
+.fcard p{font-size:11px;color:var(--muted);line-height:1.45;margin:3px 0;}
+.fcard a{color:var(--blue);font-size:11px;}
+@media(max-width:760px){.app{flex-direction:column;}.sidebar{width:100%;min-width:0;height:46vh;}.main{height:54vh;}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+<div class="brand"><div class="logo"><i>Bank</i>Map Canada</div><div class="tag">Canadian finance, on a living map</div></div>
+<div class="headline">Explore the institutions that <em>move the money</em></div>
+<div class="sub">Banks, credit unions, foreign subsidiaries, note printers and mutual fund platforms across Canada — mapped by head office, with ownership, scale and data-access notes.</div>
+<div class="stats"><div class="stat"><b>40</b><span>Institutions</span></div><div class="stat"><b>6</b><span>Big Six</span></div><div class="stat"><b>9</b><span>Fund platforms</span></div><div class="stat"><b>3</b><span>Note-print</span></div></div>
+<div class="tabbar"><button id="tabMap" class="active" onclick="showTab('map')">Map directory</button><button id="tabFund" onclick="showTab('fund')">Mutual funds</button></div>
+<div id="mapPane"><div class="section-title">Filter by type</div><div class="filters" id="filters"></div><div class="searchbox"><input id="search" placeholder="Search institution or owner..."/></div><div class="list" id="list"></div></div>
+<div id="fundPane"></div>
+</aside>
+<div class="main"><div id="map"></div><div class="overlay"><h3>Legend</h3><div id="legend"></div></div><div class="fx"><h3>Live CAD rates</h3><div id="fxbox">Loading...</div></div></div>
+</div>
+<script>
+var CURRENCY_API_KEY="4d7d88f47058400eb7385433fa7ddf8e";
+var TYPES={big:["#f2c14e","Big Six bank"],coop:["#4ecb9a","Credit union / co-op"],digital:["#7aa7ff","Digital / online bank"],foreign:["#c792ea","Foreign-owned bank"],crown:["#ff8a65","Crown / public"],note:["#e2483d","Banknote printer"],other:["#9fb0d0","Other institution"]};
+var D=[
+["Royal Bank of Canada (RBC)","Royal Bank of Canada (TSX)","Assets ~C$2.3T; revenue ~C$57.5B (2024-25)","~1,250 branches","big",43.6476,-79.3810,"No; uses Bank of Canada notes"],
+["TD Canada Trust","Toronto-Dominion Bank (TSX)","Assets ~C$2.1T; revenue ~C$57.2B","~1,060 branches","big",43.6469,-79.3813,"No; uses Bank of Canada notes"],
+["Scotiabank","Bank of Nova Scotia (TSX)","Revenue ~C$33.7B","Hundreds nationally","big",43.6489,-79.3776,"No"],
+["BMO Bank of Montreal","Bank of Montreal (TSX)","Revenue ~C$32.8B","Extensive national network","big",45.5039,-73.5570,"No"],
+["CIBC","Canadian Imperial Bank of Commerce (TSX)","Revenue ~C$25.6B","Extensive retail network","big",43.6487,-79.3817,"No"],
+["National Bank of Canada","National Bank of Canada (TSX)","Big Six; significant asset share","Coast-to-coast; 440 in BC etc.","big",45.4995,-73.5665,"No"],
+["HSBC Bank Canada","HSBC Holdings plc (UK parent)","Major foreign subsidiary","Mainly large cities","foreign",49.2856,-123.1180,"No"],
+["Laurentian Bank of Canada","Laurentian Bank (TSX)","Regional; smaller footprint","Mainly Quebec","other",45.5008,-73.5673,"No"],
+["Canadian Western Bank","Canadian Western Bank (TSX)","Western-focused; moderate assets","Mainly Western Canada","other",53.5461,-113.4938,"No"],
+["Neo Financial","Neo Financial Technologies (private)","Digital-first; smaller balance sheet","Online; no large branch network","digital",51.0447,-114.0719,"No"],
+["ATB Financial","Province of Alberta (Crown)","Provincially owned; sizable in AB","Many branches in Alberta","crown",53.5444,-113.4909,"No"],
+["Desjardins Group","Cooperative group (Quebec)","Large co-op; significant assets","Dense in Quebec and beyond","coop",46.7818,-71.2760,"No"],
+["Vancity Credit Union","Member-owned co-op","Large BC credit union","Metro Vancouver region","coop",49.2827,-123.1157,"No"],
+["Meridian Credit Union","Member-owned co-op (Ontario)","Among Ontario's largest CUs","Mainly Ontario","coop",43.1594,-79.2469,"No"],
+["FirstOntario Credit Union","Member-owned co-op","Regional; modest assets","Ontario branches","coop",43.2557,-79.8711,"No"],
+["EQ Bank (Equitable Bank)","Equitable Bank (TSX)","Growing digital-bank assets","Primarily digital","digital",43.6510,-79.3810,"No"],
+["Tangerine Bank","Subsidiary of Scotiabank","Digital bank; part of Scotiabank","No traditional branches","digital",43.6446,-79.3806,"No"],
+["Simplii Financial","Brand of CIBC","Digital channel of CIBC","Uses CIBC infrastructure","digital",43.6482,-79.3820,"No"],
+["Canadian Western Trust","Subsidiary of Canadian Western Bank","Specialized trust services","Limited offices","other",53.5450,-113.4900,"No"],
+["Manulife Bank of Canada","Manulife Financial (parent)","Small vs Big Six","Few offices; advisor-based","other",43.6640,-79.3860,"No"],
+["Home Trust Company / Home Bank","Home Capital Group","Niche lender; moderate assets","Limited offices","other",43.6512,-79.3790,"No"],
+["Canadian Tire Bank","Canadian Tire Corporation","Retail-linked; small footprint","Mostly cards","other",43.6415,-79.3801,"No"],
+["President's Choice Financial","Loblaw / banking partners","Small; retail financial services","In-store kiosks","other",43.7615,-79.4111,"No"],
+["State Bank of India Canada","State Bank of India (India parent)","Small Canadian asset base","Toronto, Vancouver, Surrey etc.","foreign",43.7000,-79.4000,"No"],
+["ICICI Bank Canada","ICICI Bank (India parent)","Modest assets","Major cities","foreign",43.6532,-79.3832,"No"],
+["Bank of China (Canada)","Bank of China (China parent)","Small footprint","Toronto, Vancouver","foreign",43.6540,-79.3850,"No"],
+["ICBC (Canada)","Industrial & Commercial Bank of China","Limited branches","Major cities","foreign",43.6548,-79.3860,"No"],
+["JPMorgan Chase Bank (Canada)","JPMorgan Chase & Co.","Small Canadian presence","Corporate offices","foreign",43.6470,-79.3790,"No"],
+["Citibank Canada","Citigroup Inc.","Corporate banking presence","Limited branches","foreign",43.6480,-79.3800,"No"],
+["BNP Paribas Canada","BNP Paribas Group","European bank; corporate focus","Major cities","foreign",45.5017,-73.5673,"No"],
+["Societe Generale (Canada)","Societe Generale Group","Corporate banking","Limited offices","foreign",45.5000,-73.5700,"No"],
+["UBS Bank (Canada)","UBS Group","Wealth & corporate services","Offices only","foreign",43.6490,-79.3830,"No"],
+["Credit Suisse (Canada)","Credit Suisse (now part of UBS)","Investment banking / wealth","Offices only","foreign",43.6495,-79.3835,"No"],
+["Canadian Bank Note Company","Canadian Bank Note Company (private)","Security printer contracted by BoC","Ottawa production facilities","note",45.3506,-75.7669,"Yes: prints Canadian banknotes since 1935"],
+["British American Bank Note Co.","BABN (Canada)","Historical security printer","Printing facilities","note",45.4215,-75.6972,"Historically printed notes; role limited now"],
+["Bank of Canada","Bank of Canada (Crown corporation)","Central bank; manages currency","Regional offices; no retail branches","note",45.4215,-75.7003,"Contracts CBNC; oversees currency"],
+["Neo-linked partner banks","Various chartered banks","Small vs Big Six","Depends on partner","other",51.0450,-114.0570,"No"],
+["Smaller domestic Schedule I banks","Various (OSFI list)","Small share of assets","Few branches","other",45.4211,-75.6903,"No"],
+["Foreign bank branches (Schedule III)","Various global banks","Corporate / wholesale ops","Limited offices","foreign",43.6500,-79.3820,"No"],
+["Federally regulated credit unions","Cooperative ownership (e.g. UNI)","Small vs big banks","Regional networks","coop",47.5615,-52.7126,"No"]
+];
+var FUNDS=[
+["Royal Bank of Canada (RBC)","RBC Global Asset Management / RBC Funds","~300+ mutual funds across fixed income, equity, balanced, specialty.","https://funds.rbcgam.com/mutual-funds-prices-performance/index.html"],
+["TD (Toronto-Dominion Bank)","TD Asset Management / TD Mutual Funds","~130+ mutual funds (balanced, index, sector, income).","https://www.td.com/ca/en/asset-management/funds/solutions/mutual-funds"],
+["Bank of Montreal (BMO)","BMO Investments / BMO Mutual Funds","100+ mutual funds across asset classes and regions.","https://www.bmo.com/main/personal/investments/mutual-funds/list/"],
+["Scotiabank","ScotiaFunds / Dynamic platform","Broad lineup of domestic, international and specialty funds.","https://www.scotiafunds.com/en/home/all-funds.html"],
+["CIBC","CIBC Mutual Funds / Renaissance Investments","Dozens of funds including sustainable and asset-allocation series.","https://www.cibc.com/en/personal-banking/investments/mutual-funds.html"],
+["National Bank of Canada","National Bank Investments (NBI) Funds","Wide set of NBI funds: resource, equity, fixed income.","https://www.fundlibrary.com/"],
+["Desjardins Group","Desjardins Funds","Large family of mutual funds and portfolios for retail investors.","https://www.desjardins.com/ca/personal/savings-investment/mutual-funds/index.jsp"],
+["Credit unions (Vancity, Meridian, Coast Capital, Servus)","Third-party fund families (NEI, IA Clarington, Mackenzie...)","Access to dozens-hundreds of funds via partnered manufacturers.","https://www.fundlibrary.com/"],
+["Independent asset managers (CI, Fidelity, Invesco, Mackenzie, Ninepoint)","Own branded fund families (CI, Fidelity, Invesco Funds...)","Each offers many equity, fixed income and balanced funds.","https://www.morningstar.ca/"]
+];
+var map=L.map('map',{zoomControl:true}).setView([56.13,-96.35],4);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'&copy; OpenStreetMap &copy; CARTO',subdomains:'abcd',maxZoom:19}).addTo(map);
+var markers=[],activeFilter='all',markerMap={};
+function mk(lat,lng,color){return L.circleMarker([lat,lng],{radius:8,color:'#fff',weight:1.5,fillColor:color,fillOpacity:.9});}
+function render(){
+markers.forEach(function(m){map.removeLayer(m);});markers=[];markerMap={};
+var q=document.getElementById('search').value.toLowerCase();
+var list=document.getElementById('list');list.innerHTML='';
+D.forEach(function(r,i){
+var name=r[0],owner=r[1],scale=r[2],branch=r[3],type=r[4],lat=r[5],lng=r[6],note=r[7];
+if(activeFilter!=='all'&&type!==activeFilter)return;
+if(q&&(name.toLowerCase().indexOf(q)<0&&owner.toLowerCase().indexOf(q)<0))return;
+var color=TYPES[type][0];
+var m=mk(lat,lng,color).addTo(map);
+m.bindPopup('<div class="pop"><h4>'+name+'</h4><p><b>Owner:</b> '+owner+'</p><p><b>Scale:</b> '+scale+'</p><p><b>Branches:</b> '+branch+'</p><p><b>Type:</b> '+TYPES[type][1]+'</p><p><b>Banknote printing:</b> '+note+'</p></div>');
+markers.push(m);markerMap[i]=m;
+var item=document.createElement('div');item.className='item';item.style.borderLeftColor=color;
+item.innerHTML='<h4>'+name+'</h4><p>'+owner+' &middot; '+TYPES[type][1]+'</p>';
+item.onclick=(function(mm,la,ln){return function(){map.setView([la,ln],9);mm.openPopup();};})(m,lat,lng);
+list.appendChild(item);
+});
+}
+function buildFilters(){
+var f=document.getElementById('filters');
+var cats=[['all','All']];for(var k in TYPES)cats.push([k,TYPES[k][1]]);
+cats.forEach(function(c){var b=document.createElement('button');b.textContent=c[1];if(c[0]==='all')b.className='active';b.onclick=function(){activeFilter=c[0];document.querySelectorAll('.filters button').forEach(function(x){x.classList.remove('active');});b.classList.add('active');render();};f.appendChild(b);});
+}
+function buildLegend(){var l=document.getElementById('legend');for(var k in TYPES){var d=document.createElement('div');d.className='lrow';d.innerHTML='<span class="dot" style="background:'+TYPES[k][0]+'"></span>'+TYPES[k][1];l.appendChild(d);}}
+function buildFunds(){var p=document.getElementById('fundPane');FUNDS.forEach(function(r){var c=document.createElement('div');c.className='fcard';c.innerHTML='<h4>'+r[0]+'</h4><p><b>'+r[1]+'</b></p><p>'+r[2]+'</p><a href="'+r[3]+'" target="_blank">View fund list &rarr;</a>';p.appendChild(c);});}
+function showTab(t){var mapPane=document.getElementById('mapPane'),fundPane=document.getElementById('fundPane');if(t==='map'){mapPane.style.display='block';fundPane.style.display='none';document.getElementById('tabMap').classList.add('active');document.getElementById('tabFund').classList.remove('active');}else{mapPane.style.display='none';fundPane.style.display='block';document.getElementById('tabFund').classList.add('active');document.getElementById('tabMap').classList.remove('active');}}
+document.getElementById('search').addEventListener('input',render);
+function loadFX(){
+var url='https://api.currencyfreaks.com/v2.0/rates/latest?apikey='+CURRENCY_API_KEY+'&symbols=USD,EUR,GBP,CAD&base=CAD';
+fetch('https://api.currencyfreaks.com/v2.0/rates/latest?apikey='+CURRENCY_API_KEY+'&symbols=USD,EUR,GBP')
+.then(function(r){return r.json();})
+.then(function(j){var rt=j.rates||{};var cad=parseFloat(rt.CAD||0);var box=document.getElementById('fxbox');function per(sym){var v=parseFloat(rt[sym]||0);if(!cad||!v)return '-';return (v/cad).toFixed(4);}box.innerHTML='<div>1 CAD = '+per('USD')+' USD</div><div>1 CAD = '+per('EUR')+' EUR</div><div>1 CAD = '+per('GBP')+' GBP</div>';})
+.catch(function(){document.getElementById('fxbox').innerHTML='Rates unavailable';});
+}
+buildFilters();buildLegend();buildFunds();render();loadFX();
+</script>
+</body>
+</html>
