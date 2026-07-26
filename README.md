@@ -8,19 +8,19 @@ An interactive dashboard of Canadian banks, credit unions, foreign bank subsidia
 
 ## Overview
 
-BankMap Canada is a front-end data visualization project focused on the Canadian financial landscape. It combines a geographic map, searchable institution directory, legend system, tab-based navigation, and mutual fund platform listings into a single browsing experience. [page:1]
+BankMap Canada is a front-end data visualization project focused on the Canadian financial landscape. It combines a geographic map, searchable institution directory, legend system, tab-based navigation, and mutual fund platform listings into a single browsing experience. 
 
-The project is designed as an interactive reference tool for users who want to explore the structure of Canadian banking and adjacent financial infrastructure, including the Big Six banks, digital banks, cooperatives, foreign-owned institutions, crown financial entities, and note-printing firms. [page:1]
+The project is designed as an interactive reference tool for users who want to explore the structure of Canadian banking and adjacent financial infrastructure, including the Big Six banks, digital banks, cooperatives, foreign-owned institutions, crown financial entities, and note-printing firms. 
 
 ## Features
 
-- Interactive map of Canadian financial institutions by head-office location. [page:1]
-- Search bar for filtering institutions by name or ownership. [page:1]
-- Category filters for institution types such as Big Six banks, co-ops, digital banks, foreign-owned banks, crown institutions, note printers, and other entities. [page:1]
-- Editorial grid-based layout inspired by Müller-Brockmann design principles. [page:1]
-- Mutual fund tab for separating investment-platform content from the main institutional map view. [page:1]
-- Live CAD exchange-rate panel integrated into the interface. [page:1]
-- Grid toggle for inspecting the underlying 12-column visual system. [page:1]
+- Interactive map of Canadian financial institutions by head-office location. 
+- Search bar for filtering institutions by name or ownership. 
+- Category filters for institution types such as Big Six banks, co-ops, digital banks, foreign-owned banks, crown institutions, note printers, and other entities.
+- Editorial grid-based layout inspired by Müller-Brockmann design principles. 
+- Mutual fund tab for separating investment-platform content from the main institutional map view. 
+- Live CAD exchange-rate panel integrated into the interface. 
+- Grid toggle for inspecting the underlying 12-column visual system. 
 
 ## Repository structure
 
@@ -28,7 +28,7 @@ The project is designed as an interactive reference tool for users who want to e
 |------|---------|
 | `README.md` | Project documentation and usage guide.  |
 | `index.html` | Main project entry file in the repository.  |
-| `map.html` | Interactive dashboard page containing layout, styles, map logic, and institution data. [page:13][page:1] |
+| `map.html` | Interactive dashboard page containing layout, styles, map logic, and institution data. |
 
 ## Data coverage
 
@@ -46,15 +46,15 @@ This makes the dashboard useful not only as a finance reference interface but al
 
 1. Clone the repository.
 2. Open `map.html` in a browser, or serve the repository locally with a simple static server.
-3. Explore the map, use the search and filters, and switch between the directory and mutual-fund views. [page:1]
+3. Explore the map, use the search and filters, and switch between the directory and mutual-fund views. 
 
 Then open `map.html` in your browser. 
 
 ## Usage
 
-Use the **Map directory** tab to explore institutions geographically and browse categorized entries. Use the **Mutual funds** tab to view the investment-platform section separately from the institutional map. [page:1]
+Use the **Map directory** tab to explore institutions geographically and browse categorized entries. Use the **Mutual funds** tab to view the investment-platform section separately from the institutional map.
 
-The search input allows quick filtering, while the category buttons help isolate segments of the financial system. The legend and live CAD rate panel provide additional context within the same interface. [page:1]
+The search input allows quick filtering, while the category buttons help isolate segments of the financial system. The legend and live CAD rate panel provide additional context within the same interface.
 
 ## Current status
 
