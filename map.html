@@ -161,7 +161,7 @@ function showTab(t){var mapPane=document.getElementById('mapPane'),fundPane=docu
 document.getElementById('search').addEventListener('input',render);
 function loadFX(){
 var url='https://api.currencyfreaks.com/v2.0/rates/latest?apikey='+CURRENCY_API_KEY+'&symbols=USD,EUR,GBP,CAD&base=CAD';
-fetch('https://api.currencyfreaks.com/v2.0/rates/latest?apikey='+CURRENCY_API_KEY+'&symbols=USD,EUR,GBP')
+fetch('https://api.currencyfreaks.com/v2.0/rates/latest?apikey='+CURRENCY_API_KEY+'&symbols=USD,EUR,GBP,CAD')
 .then(function(r){return r.json();})
 .then(function(j){var rt=j.rates||{};var cad=parseFloat(rt.CAD||0);var box=document.getElementById('fxbox');function per(sym){var v=parseFloat(rt[sym]||0);if(!cad||!v)return '-';return (v/cad).toFixed(4);}box.innerHTML='<div>1 CAD = '+per('USD')+' USD</div><div>1 CAD = '+per('EUR')+' EUR</div><div>1 CAD = '+per('GBP')+' GBP</div>';})
 .catch(function(){document.getElementById('fxbox').innerHTML='Rates unavailable';});
