@@ -162,4 +162,4 @@ Contributions that improve data quality, interface design, documentation, access
 
 ## License
 
-No explicit license is visible from the current repository context, so a license file should be added if reuse or public contribution is intended. [page:14]
+Do not use it for selling. Use only to sustain education.
