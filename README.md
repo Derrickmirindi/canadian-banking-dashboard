@@ -23,9 +23,9 @@
 
 ## Overview
 
-**BankMap Canada** is an interactive front-end dashboard that maps Canadian financial institutions by head office and organizes them through searchable, filterable, and category-based navigation. The repository currently contains `README.md`, `index.html`, and `map.html`, with `index.html` now redirecting users directly to the main dashboard page in `map.html`. [page:14]
+**BankMap Canada** is an interactive front-end dashboard that maps Canadian financial institutions by head office and organizes them through searchable, filterable, and category-based navigation. The repository currently contains `README.md`, `index.html`, and `map.html`, with `index.html` now redirecting users directly to the main dashboard page in `map.html`.
 
-The project is structured as a visual reference interface for exploring the Canadian financial system, including major banks, credit unions, digital-first institutions, foreign-owned subsidiaries, note printers, and mutual fund platforms. The interface uses a strong editorial layout language with a 12-column grid and tab-based navigation. [page:14]
+The project is structured as a visual reference interface for exploring the Canadian financial system, including major banks, credit unions, digital-first institutions, foreign-owned subsidiaries, note printers, and mutual fund platforms. The interface uses a strong editorial layout language with a 12-column grid and tab-based navigation. 
 
 ---
 
@@ -36,7 +36,7 @@ The project is structured as a visual reference interface for exploring the Cana
 | Project name | **BankMap Canada** |
 | Type | Interactive financial dashboard |
 | Main interface | `map.html` |
-| Entry point | `index.html` redirects to `map.html` [page:14] |
+| Entry point | `index.html` redirects to `map.html`  |
 | Focus | Canadian banks, financial institutions, and mutual fund platforms |
 | Current stage | Under development |
 
@@ -93,7 +93,7 @@ canadian-banking-dashboard/
 | File | Role |
 |------|------|
 | `README.md` | Project documentation |
-| `index.html` | Redirect entry page that sends visitors to `map.html` [page:14] |
+| `index.html` | Redirect entry page that sends visitors to `map.html` |
 | `map.html` | Main dashboard containing layout, styles, scripts, and institution data |
 
 ---
@@ -111,7 +111,7 @@ git clone https://github.com/Derrickmirindi/canadian-banking-dashboard.git
 cd canadian-banking-dashboard
 ```
 
-Because `index.html` redirects to `map.html`, either file can serve as the entry point for visitors, but the actual dashboard experience lives in `map.html`. [page:14]
+Because `index.html` redirects to `map.html`, either file can serve as the entry point for visitors, but the actual dashboard experience lives in `map.html`.
 
 ### Suggested local server
 
