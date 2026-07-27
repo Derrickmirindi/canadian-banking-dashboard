@@ -3,6 +3,7 @@
 <p align="center">
   <strong>An interactive dashboard of Canadian banks, credit unions, foreign subsidiaries, note printers, and mutual fund platforms.</strong>
 </p>
+<img width="1176" height="981" alt="image" src="https://github.com/user-attachments/assets/aa050eb3-b89b-41a3-9425-efd3e707e370" />
 
 <p align="center">
   <a href="./map.html">Open Dashboard</a> ·
